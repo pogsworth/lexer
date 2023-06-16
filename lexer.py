@@ -11,19 +11,18 @@ class token:
 class lexer:
     def __init__(self, input):
         self.input = input
-        self.next_char = input.read(1)
-        self.current_char = self.next_char
+        self.current_char = self.input.read(1)
+        self.consumed = False
         self.EOF = -1
     
     def get_next_char(self):
-        if self.next_char == '':
+        if self.current_char == '':
             return self.EOF
-        if self.current_char:
-            c = self.current_char
-            self.current_char = ''
-            return c
-        self.next_char = self.input.read(1)
-        return self.next_char
+        if not self.consumed:
+            self.consumed = True
+            return self.current_char
+        self.current_char = self.input.read(1)
+        return self.current_char
 
     # recognize strings and numbers        
     def get_next_token(self):
@@ -37,8 +36,7 @@ class lexer:
                 while c.isnumeric():
                     current_number += c
                     c = self.get_next_char()
-                self.current_char = c
-                print('current char: ', c)
+                self.consumed = False
                 return token('number', int(current_number))
             
             elif c == '"':
