@@ -35,6 +35,7 @@ class lexer:
                 while c.isnumeric():
                     current_number += c
                     c = self.get_next_char()
+                # do we need a put_char so that next token can start with this char?
                 return token('number', int(current_number))
             
             elif c == '"':
@@ -42,6 +43,7 @@ class lexer:
                 while c != '"':
                     current_string += c
                     c = self.get_next_char()
+                # do we need a put_char so that next token can start with this char?
                 return token('string', current_string)
             
             else:
@@ -52,7 +54,7 @@ class lexer:
 def main():
     l = lexer(sys.stdin)
     t = True
-    while t != -1:
+    while t != l.EOF:
         t = l.get_next_token()
         print(t)
 
