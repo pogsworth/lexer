@@ -11,39 +11,42 @@ class token:
 class lexer:
     def __init__(self, input):
         self.input = input
-        self.next_char = -1
-        self.current_line = self.input.readline()
-        self.current_pos = 0
+        self.next_char = input.read(1)
+        self.current_char = self.next_char
         self.EOF = -1
     
     def get_next_char(self):
         if self.next_char == '':
             return self.EOF
+        if self.current_char:
+            c = self.current_char
+            self.current_char = ''
+            return c
         self.next_char = self.input.read(1)
         return self.next_char
 
     # recognize strings and numbers        
     def get_next_token(self):
-        current_number = ''
-        current_string = ''
-
         while True:
             c = self.get_next_char()
             if c == self.EOF:
                 return self.EOF
+
             elif c.isnumeric():
+                current_number = ''
                 while c.isnumeric():
                     current_number += c
                     c = self.get_next_char()
-                # do we need a put_char so that next token can start with this char?
+                self.current_char = c
+                print('current char: ', c)
                 return token('number', int(current_number))
             
             elif c == '"':
+                current_string = ''
                 c = self.get_next_char()
                 while c != '"':
                     current_string += c
                     c = self.get_next_char()
-                # do we need a put_char so that next token can start with this char?
                 return token('string', current_string)
             
             else:
@@ -52,7 +55,10 @@ class lexer:
                     print('unexpected char:',c)
 
 def main():
-    l = lexer(sys.stdin)
+    input = sys.stdin
+    if len(sys.argv) > 1:
+        input = open(sys.argv[1])
+    l = lexer(input)
     t = True
     while t != l.EOF:
         t = l.get_next_token()
