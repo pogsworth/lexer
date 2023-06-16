@@ -17,19 +17,9 @@ class lexer:
         self.EOF = -1
     
     def get_next_char(self):
-        if len(self.current_line) != 0:
-            self.next_char  =  self.EOF
-
-        if self.current_pos >= len(self.current_line):
-            self.current_line = self.input.readline()
-            self.current_pos = 0
-
-        if self.current_pos < len(self.current_line):
-            self.next_char = self.current_line[self.current_pos]
-            self.current_pos += 1
-        else:
-            self.next_char = self.EOF
-
+        if self.next_char == '':
+            return self.EOF
+        self.next_char = self.input.read(1)
         return self.next_char
 
     # recognize strings and numbers        
@@ -42,33 +32,27 @@ class lexer:
             if c == self.EOF:
                 return self.EOF
             elif c.isnumeric():
-                break
+                while c.isnumeric():
+                    current_number += c
+                    c = self.get_next_char()
+                return token('number', int(current_number))
+            
             elif c == '"':
                 c = self.get_next_char()
-                break
+                while c != '"':
+                    current_string += c
+                    c = self.get_next_char()
+                return token('string', current_string)
+            
             else:
                 #unexpected!
                 if not c.isspace():
                     print('unexpected char:',c)
 
-        while c.isnumeric():
-            current_number += c
-            c = self.get_next_char()
-        if current_number and c.isspace() or c == self.EOF:
-            return token('number', int(current_number))
-
-        while c != '"':
-            current_string += c
-            c = self.get_next_char()
-        if current_string and c=='"':
-            return token('string', current_string)
-        
-        return None
-
 def main():
     l = lexer(sys.stdin)
     t = True
-    while t:
+    while t != -1:
         t = l.get_next_token()
         print(t)
 
